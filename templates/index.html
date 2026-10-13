@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>StudyForge</title>
+</head>
+<body>
+  <h1>StudyForge</h1>
+
+  <form method="POST">
+    <input name="subject" placeholder="Subject (e.g. DBMS)" required>
+    <input name="title" placeholder="Note title" required>
+    <textarea name="content" placeholder="Write your note..." required></textarea>
+    <button type="submit">Add note</button>
+  </form>
+
+  <h2>Your notes</h2>
+  {% for note in notes %}
+    <div>
+      <strong>{{ note.subject }}</strong> - {{ note.title }}
+      <p>{{ note.content }}</p>
+    </div>
+  {% else %}
+    <p>No notes yet.</p>
+  {% endfor %}
+</body>
+</html>
