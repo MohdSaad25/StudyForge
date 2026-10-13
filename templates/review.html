@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Review</title></head>
+<body>
+  <h1>Review</h1>
+  {% if card %}
+    <p>Card {{ i + 1 }} of {{ total }} ({{ card.subject }})</p>
+    <h2>{{ card.question }}</h2>
+    <button onclick="document.getElementById('ans').style.display='block'; this.style.display='none'">
+      Show answer
+    </button>
+    <div id="ans" style="display:none">
+      <p>{{ card.answer }}</p>
+      <a href="{{ url_for('review', i=i + 1) }}">Next</a>
+    </div>
+  {% else %}
+    <p>No more cards. Done!</p>
+    <a href="{{ url_for('review') }}">Start again</a>
+  {% endif %}
+  <br><a href="{{ url_for('home') }}">Back</a>
+</body>
+</html>

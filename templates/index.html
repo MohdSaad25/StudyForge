@@ -6,7 +6,7 @@
 </head>
 <body>
   <h1>StudyForge</h1>
-
+  <p><a href="{{ url_for('cards') }}">My flashcards</a> | <a href="{{ url_for('review') }}">Review</a></p>
   <form method="POST">
     <input name="subject" placeholder="Subject (e.g. DBMS)" required>
     <input name="title" placeholder="Note title" required>
@@ -27,6 +27,7 @@
     <strong>{{ note.subject }}</strong> - {{ note.title }}
     <p>{{ note.content }}</p>
     <a href="{{ url_for('edit', note_id=note.id) }}">Edit</a>
+    <a href="{{ url_for('new_card', note_id=note.id) }}">Add flashcard</a>
     <form method="POST" action="{{ url_for('delete', note_id=note.id) }}" style="display:inline">
       <button type="submit">Delete</button>
     </form>

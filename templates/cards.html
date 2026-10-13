@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Flashcards</title></head>
+<body>
+  <h1>My flashcards</h1>
+  {% for c in cards %}
+    <div>
+      <strong>{{ c.subject }}</strong>: {{ c.question }}
+      <p>{{ c.answer }}</p>
+    </div>
+  {% else %}
+    <p>No flashcards yet. Add one from a note.</p>
+  {% endfor %}
+  <a href="{{ url_for('home') }}">Back</a>
+</body>
+</html>
