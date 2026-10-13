@@ -15,6 +15,13 @@
   </form>
 
   <h2>Your notes</h2>
+  <p>
+    <a href="{{ url_for('home') }}">All</a>
+      {% for s in subjects %}
+    |    <a href="{{ url_for('home', subject=s) }}">{{ s }}</a>
+      {% endfor %}
+ </p>
+{% if selected %}<p>Showing: <strong>{{ selected }}</strong></p>{% endif %}
   {% for note in notes %}
   <div>
     <strong>{{ note.subject }}</strong> - {{ note.title }}

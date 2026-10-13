@@ -34,9 +34,19 @@ def home():
             )
         return redirect(url_for("home"))
 
+    selected = request.args.get("subject", "")
     with get_db() as conn:
-        notes = conn.execute("SELECT * FROM notes ORDER BY created_at DESC").fetchall()
-    return render_template("index.html", notes=notes)
+        subjects = [r["subject"] for r in conn.execute(
+            "SELECT DISTINCT subject FROM notes ORDER BY subject"
+        ).fetchall()]
+        if selected:
+            notes = conn.execute(
+                "SELECT * FROM notes WHERE subject = ? ORDER BY created_at DESC",
+                (selected,),
+            ).fetchall()
+        else:
+            notes = conn.execute("SELECT * FROM notes ORDER BY created_at DESC").fetchall()
+    return render_template("index.html", notes=notes, subjects=subjects, selected=selected)
 @app.route("/delete/<int:note_id>", methods=["POST"])
 def delete(note_id):
     with get_db() as conn:
