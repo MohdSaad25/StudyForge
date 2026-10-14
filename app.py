@@ -164,20 +164,41 @@ def rate(card_id):
     return redirect(url_for("review"))
 
 @app.route("/quiz")
+@app.route("/quiz")
 def quiz():
     with get_db() as conn:
+        subjects = conn.execute("""
+            SELECT f.subject AS subject,
+                   COUNT(*) AS cards,
+                   (SELECT COUNT(*) FROM quiz_log q WHERE q.subject = f.subject) AS attempts,
+                   (SELECT COALESCE(SUM(correct), 0) FROM quiz_log q WHERE q.subject = f.subject) AS num_correct
+            FROM flashcards f
+            GROUP BY f.subject
+            ORDER BY f.subject
+        """).fetchall()
+    return render_template("quiz_select.html", subjects=subjects)
+
+@app.route("/quiz/<subject>")
+def quiz_subject(subject):
+    with get_db() as conn:
         all_cards = conn.execute("SELECT * FROM flashcards").fetchall()
-    if len(all_cards) < 2:
-        return render_template("quiz.html", questions=[])
-    picked = random.sample(all_cards, min(5, len(all_cards)))
+    subject_cards = [c for c in all_cards if c["subject"] == subject]
+    if not subject_cards or len(all_cards) < 2:
+        return render_template("quiz.html", questions=[], subject=subject)
+    picked = random.sample(subject_cards, min(5, len(subject_cards)))
     questions = []
     for c in picked:
-        others = [x["answer"] for x in all_cards
-                  if x["id"] != c["id"] and x["answer"] != c["answer"]]
-        options = random.sample(others, min(3, len(others))) + [c["answer"]]
+        same = [x["answer"] for x in subject_cards
+                if x["id"] != c["id"] and x["answer"] != c["answer"]]
+        other = [x["answer"] for x in all_cards
+                 if x["subject"] != subject and x["answer"] != c["answer"]]
+        random.shuffle(same)
+        random.shuffle(other)
+        distractors = list(dict.fromkeys(same + other))[:3]
+        options = distractors + [c["answer"]]
         random.shuffle(options)
         questions.append({"card": c, "options": options})
-    return render_template("quiz.html", questions=questions)
+    return render_template("quiz.html", questions=questions, subject=subject)
 
 @app.route("/quiz/submit", methods=["POST"])
 def quiz_submit():
@@ -196,7 +217,9 @@ def quiz_submit():
             )
             results.append({"card": card, "chosen": chosen, "correct": correct})
     score = sum(r["correct"] for r in results)
-    return render_template("quiz_result.html", results=results, score=score, total=len(results))
+    subject = results[0]["card"]["subject"] if results else ""
+    return render_template("quiz_result.html", results=results, score=score,
+    total=len(results), subject=subject)
 
 if __name__ == "__main__":
     init_db()

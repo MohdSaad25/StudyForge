@@ -2,7 +2,7 @@
 <html>
 <head><meta charset="UTF-8"><title>Quiz</title></head>
 <body>
-  <h1>Quiz</h1>
+  <h1>Quiz: {{ subject }}</h1>
   {% if questions %}
     <form method="POST" action="{{ url_for('quiz_submit') }}">
       {% for q in questions %}
@@ -20,8 +20,8 @@
       <button type="submit">Submit quiz</button>
     </form>
   {% else %}
-    <p>Add at least 2 flashcards to start a quiz.</p>
+    <p>No quiz available. Add flashcards to this subject first.</p>
   {% endif %}
-  <br><a href="{{ url_for('home') }}">Back</a>
+  <br><a href="{{ url_for('quiz') }}">Back</a>
 </body>
 </html>

@@ -14,7 +14,10 @@
       {% endif %}
     </div>
   {% endfor %}
-  <a href="{{ url_for('quiz') }}">Try another quiz</a> |
+  {% if subject %}
+    <a href="{{ url_for('quiz_subject', subject=subject) }}">Retry {{ subject }} quiz</a> |
+  {% endif %}
+  <a href="{{ url_for('quiz') }}">All subjects</a> |
   <a href="{{ url_for('home') }}">Home</a>
 </body>
 </html>
