@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Quiz result</title></head>
+<body>
+  <h1>Score: {{ score }} / {{ total }}</h1>
+  {% for r in results %}
+    <div>
+      <p><strong>{{ r.card.question }}</strong></p>
+      {% if r.correct %}
+        <p>Correct: {{ r.card.answer }}</p>
+      {% else %}
+        <p>Wrong. You chose: {{ r.chosen }}</p>
+        <p>Right answer: {{ r.card.answer }}</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+  <a href="{{ url_for('quiz') }}">Try another quiz</a> |
+  <a href="{{ url_for('home') }}">Home</a>
+</body>
+</html>

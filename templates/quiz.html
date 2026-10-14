@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Quiz</title></head>
+<body>
+  <h1>Quiz</h1>
+  {% if questions %}
+    <form method="POST" action="{{ url_for('quiz_submit') }}">
+      {% for q in questions %}
+        <div>
+          <p><strong>{{ loop.index }}.</strong> ({{ q.card.subject }}) {{ q.card.question }}</p>
+          <input type="hidden" name="card_id" value="{{ q.card.id }}">
+          {% for opt in q.options %}
+            <label>
+              <input type="radio" name="answer_{{ q.card.id }}" value="{{ opt }}" required>
+              {{ opt }}
+            </label><br>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit">Submit quiz</button>
+    </form>
+  {% else %}
+    <p>Add at least 2 flashcards to start a quiz.</p>
+  {% endif %}
+  <br><a href="{{ url_for('home') }}">Back</a>
+</body>
+</html>

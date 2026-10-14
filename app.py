@@ -1,4 +1,5 @@
 import sqlite3
+import random
 from datetime import date, timedelta
 from flask import Flask, render_template, request, redirect, url_for,abort
 
@@ -48,6 +49,15 @@ def init_db():
                 subject TEXT NOT NULL,
                 quality INTEGER NOT NULL,
                 reviewed_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS quiz_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                card_id INTEGER NOT NULL,
+                subject TEXT NOT NULL,
+                correct INTEGER NOT NULL,
+                taken_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
 
@@ -153,6 +163,40 @@ def rate(card_id):
         )
     return redirect(url_for("review"))
 
+@app.route("/quiz")
+def quiz():
+    with get_db() as conn:
+        all_cards = conn.execute("SELECT * FROM flashcards").fetchall()
+    if len(all_cards) < 2:
+        return render_template("quiz.html", questions=[])
+    picked = random.sample(all_cards, min(5, len(all_cards)))
+    questions = []
+    for c in picked:
+        others = [x["answer"] for x in all_cards
+                  if x["id"] != c["id"] and x["answer"] != c["answer"]]
+        options = random.sample(others, min(3, len(others))) + [c["answer"]]
+        random.shuffle(options)
+        questions.append({"card": c, "options": options})
+    return render_template("quiz.html", questions=questions)
+
+@app.route("/quiz/submit", methods=["POST"])
+def quiz_submit():
+    ids = request.form.getlist("card_id", type=int)
+    results = []
+    with get_db() as conn:
+        for cid in ids:
+            card = conn.execute("SELECT * FROM flashcards WHERE id = ?", (cid,)).fetchone()
+            if card is None:
+                continue
+            chosen = request.form.get(f"answer_{cid}", "")
+            correct = chosen == card["answer"]
+            conn.execute(
+                "INSERT INTO quiz_log (card_id, subject, correct) VALUES (?, ?, ?)",
+                (cid, card["subject"], int(correct)),
+            )
+            results.append({"card": card, "chosen": chosen, "correct": correct})
+    score = sum(r["correct"] for r in results)
+    return render_template("quiz_result.html", results=results, score=score, total=len(results))
 
 if __name__ == "__main__":
     init_db()
