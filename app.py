@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import date, timedelta
 from flask import Flask, render_template, request, redirect, url_for,abort
 
 app = Flask(__name__)
@@ -8,6 +9,22 @@ def get_db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
     return conn
+
+def sm2(ease, interval, reps, quality):
+    if quality < 3:
+        reps = 0
+        interval = 1
+    else:
+        if reps == 0:
+            interval = 1
+        elif reps == 1:
+            interval = 6
+        else:
+            interval = round(interval * ease)
+        reps += 1
+    ease = ease + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
+    ease = max(1.3, ease)
+    return ease, interval, reps
 
 def init_db():
     with get_db() as conn:
@@ -22,6 +39,15 @@ def init_db():
                 interval_days INTEGER DEFAULT 0,
                 repetitions INTEGER DEFAULT 0,
                 next_review TEXT DEFAULT CURRENT_DATE
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS review_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                card_id INTEGER NOT NULL,
+                subject TEXT NOT NULL,
+                quality INTEGER NOT NULL,
+                reviewed_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
 
@@ -93,13 +119,41 @@ def cards():
 
 @app.route("/review")
 def review():
-    i = request.args.get("i", 0, type=int)
+    today = date.today().isoformat()
     with get_db() as conn:
-        total = conn.execute("SELECT COUNT(*) FROM flashcards").fetchone()[0]
+        due = conn.execute(
+            "SELECT COUNT(*) FROM flashcards WHERE next_review <= ?", (today,)
+        ).fetchone()[0]
         card = conn.execute(
-            "SELECT * FROM flashcards ORDER BY id LIMIT 1 OFFSET ?", (i,)
+            "SELECT * FROM flashcards WHERE next_review <= ? ORDER BY next_review, id LIMIT 1",
+            (today,),
         ).fetchone()
-    return render_template("review.html", card=card, i=i, total=total)
+    return render_template("review.html", card=card, due=due)
+
+@app.route("/review/<int:card_id>", methods=["POST"])
+def rate(card_id):
+    quality = {"again": 1, "good": 4, "easy": 5}.get(request.form.get("rating"))
+    if quality is None:
+        abort(400)
+    with get_db() as conn:
+        card = conn.execute("SELECT * FROM flashcards WHERE id = ?", (card_id,)).fetchone()
+        if card is None:
+            abort(404)
+        ease, interval, reps = sm2(
+            card["ease"], card["interval_days"], card["repetitions"], quality
+        )
+        next_review = (date.today() + timedelta(days=interval)).isoformat()
+        conn.execute(
+            "UPDATE flashcards SET ease = ?, interval_days = ?, repetitions = ?, next_review = ? WHERE id = ?",
+            (ease, interval, reps, next_review, card_id),
+        )
+        conn.execute(
+            "INSERT INTO review_log (card_id, subject, quality) VALUES (?, ?, ?)",
+            (card_id, card["subject"], quality),
+        )
+    return redirect(url_for("review"))
+
+
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)

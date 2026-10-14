@@ -7,6 +7,7 @@
     <div>
       <strong>{{ c.subject }}</strong>: {{ c.question }}
       <p>{{ c.answer }}</p>
+      <small>Next review: {{ c.next_review }} | Interval: {{ c.interval_days }} day(s) | Ease: {{ '%.2f'|format(c.ease) }}</small>
     </div>
   {% else %}
     <p>No flashcards yet. Add one from a note.</p>
