@@ -1,10 +1,12 @@
 import sqlite3
 import random
+import os
 from datetime import date, timedelta
 from flask import Flask, render_template, request, redirect, url_for,abort
 
 app = Flask(__name__)
-DB = "studyforge.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB = os.path.join(BASE_DIR, "studyforge.db")
 
 def get_db():
     conn = sqlite3.connect(DB)
@@ -221,6 +223,6 @@ def quiz_submit():
     return render_template("quiz_result.html", results=results, score=score,
     total=len(results), subject=subject)
 
+init_db()
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True)
