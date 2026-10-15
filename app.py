@@ -1,6 +1,7 @@
 import sqlite3
 import random
 import os
+import pandas as pd
 from datetime import date, timedelta
 from flask import Flask, render_template, request, redirect, url_for,abort
 
@@ -222,6 +223,49 @@ def quiz_submit():
     subject = results[0]["card"]["subject"] if results else ""
     return render_template("quiz_result.html", results=results, score=score,
     total=len(results), subject=subject)
+
+
+@app.route("/dashboard")
+def dashboard():
+    conn = sqlite3.connect(DB)
+    quiz = pd.read_sql_query("SELECT subject, correct FROM quiz_log", conn)
+    rev = pd.read_sql_query(
+        "SELECT subject, quality, datetime(reviewed_at, 'localtime') AS reviewed_at FROM review_log",
+        conn,
+    )
+    conn.close()
+
+    # review mein Good/Easy (quality >= 3) ko "yaad tha" maante hain
+    rev["correct"] = (rev["quality"] >= 3).astype(int)
+
+    # quiz aur review dono ko ek table mein jodo
+    both = pd.concat([quiz[["subject", "correct"]], rev[["subject", "correct"]]])
+
+    labels, values, weak = [], [], None
+    if not both.empty:
+        acc = (both.groupby("subject")["correct"].mean() * 100).round().sort_values()
+        labels = list(acc.index)
+        values = [int(v) for v in acc.values]
+        weak = labels[0]  # sabse kam accuracy wala
+
+    # pichhle 7 din mein roz kitne cards review hue
+    days = [date.today() - timedelta(days=i) for i in range(6, -1, -1)]
+    if not rev.empty:
+        rev["day"] = pd.to_datetime(rev["reviewed_at"]).dt.date
+        per_day = rev.groupby("day").size()
+    else:
+        per_day = pd.Series(dtype=int)
+    week_counts = [int(per_day.get(d, 0)) for d in days]
+    week_labels = [d.strftime("%a") for d in days]
+
+    return render_template(
+        "dashboard.html",
+        labels=labels, values=values, weak=weak,
+        week_labels=week_labels, week_counts=week_counts,
+        total_reviews=len(rev), total_quiz=len(quiz),
+    )
+
+
 
 init_db()
 if __name__ == "__main__":

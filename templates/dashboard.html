@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script>
+</head>
+<body>
+  <h1>Progress</h1>
+  <p>Cards reviewed: {{ total_reviews }} | Quiz answers: {{ total_quiz }}</p>
+
+  {% if weak %}
+    <p><strong>Weakest subject: {{ weak }}</strong> ({{ values[0] }}% accuracy). Revise it first.</p>
+  {% else %}
+    <p>No data yet. Review some cards and take a quiz first.</p>
+  {% endif %}
+
+  <h2>Accuracy by subject</h2>
+  <canvas id="acc" height="120"></canvas>
+
+  <h2>Cards reviewed (last 7 days)</h2>
+  <canvas id="week" height="120"></canvas>
+
+  <script>
+    new Chart(document.getElementById('acc'), {
+      type: 'bar',
+      data: {
+        labels: {{ labels|tojson }},
+        datasets: [{ label: 'Accuracy %', data: {{ values|tojson }} }]
+      },
+      options: { scales: { y: { min: 0, max: 100 } } }
+    });
+
+    new Chart(document.getElementById('week'), {
+      type: 'bar',
+      data: {
+        labels: {{ week_labels|tojson }},
+        datasets: [{ label: 'Cards reviewed', data: {{ week_counts|tojson }} }]
+      },
+      options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+  </script>
+
+  <br><a href="{{ url_for('home') }}">Back</a>
+</body>
+</html>
