@@ -1,7 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>Quiz</title></head>
-<body>
+{% extends "base.html" %}
+{% block title %}Quiz{% endblock %}
+{% block content %}
   <h1>Choose a subject</h1>
   {% for s in subjects %}
     <div>
@@ -18,6 +17,4 @@
   {% else %}
     <p>Add some flashcards first.</p>
   {% endfor %}
-  <br><a href="{{ url_for('home') }}">Back</a>
-</body>
-</html>
+{% endblock %}

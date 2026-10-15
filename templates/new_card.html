@@ -1,7 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>New flashcard</title></head>
-<body>
+{% extends "base.html" %}
+{% block title %}New flashcard{% endblock %}
+{% block content %}
   <h1>New flashcard</h1>
   <p>From note: <strong>{{ note.subject }}</strong> - {{ note.title }}</p>
   <form method="POST">
@@ -9,6 +8,4 @@
     <textarea name="answer" placeholder="Answer" required></textarea>
     <button type="submit">Save card</button>
   </form>
-  <a href="{{ url_for('home') }}">Back</a>
-</body>
-</html>
+{% endblock %}

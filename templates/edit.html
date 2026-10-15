@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Edit note</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Edit note{% endblock %}
+{% block content %}
   <h1>Edit note</h1>
   <form method="POST">
     <input name="subject" value="{{ note.subject }}" required>
@@ -12,6 +8,4 @@
     <textarea name="content" required>{{ note.content }}</textarea>
     <button type="submit">Save</button>
   </form>
-  <a href="{{ url_for('home') }}">Back</a>
-</body>
-</html>
+{% endblock %}

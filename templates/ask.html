@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Ask your notes{% endblock %}
+{% block content %}
+  <h1>Ask your notes</h1>
+  <form method="GET">
+    <input name="q" value="{{ q }}" placeholder="e.g. What is deadlock?" required>
+    <button type="submit">Ask</button>
+  </form>
+
+  {% if q %}
+    {% for r in results %}
+      <div>
+        <p>{{ r.text }}</p>
+        <small>From: {{ r.subject }} - {{ r.title }} | Match: {{ r.score }}%</small>
+      </div>
+    {% else %}
+      <p>No matching notes found. Try different words.</p>
+    {% endfor %}
+  {% endif %}
+{% endblock %}

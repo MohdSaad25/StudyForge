@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block head %}
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script>
-</head>
-<body>
+{% endblock %}
+{% block content %}
   <h1>Progress</h1>
   <p>Cards reviewed: {{ total_reviews }} | Quiz answers: {{ total_quiz }}</p>
 
@@ -40,7 +38,4 @@
       options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
     });
   </script>
-
-  <br><a href="{{ url_for('home') }}">Back</a>
-</body>
-</html>
+{% endblock %}

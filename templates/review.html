@@ -1,7 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>Review</title></head>
-<body>
+{% extends "base.html" %}
+{% block title %}Review{% endblock %}
+{% block content %}
   <h1>Review</h1>
   {% if card %}
     <p>{{ due }} card(s) due | {{ card.subject }}</p>
@@ -20,6 +19,4 @@
   {% else %}
     <p>All caught up. No cards due today.</p>
   {% endif %}
-  <br><a href="{{ url_for('home') }}">Back</a>
-</body>
-</html>
+{% endblock %}

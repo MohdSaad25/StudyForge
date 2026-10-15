@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>StudyForge</title>
-</head>
-<body>
-  <h1>StudyForge</h1>
-  <p><a href="{{ url_for('cards') }}">My flashcards</a> | <a href="{{ url_for('review') }}">Review</a> | <a href="{{ url_for('quiz') }}">Quiz</a>| <a href="{{ url_for('dashboard') }}">Dashboard</a></p>
+{% extends "base.html" %}
+{% block content %}
+  <h1>Your notes</h1>
+
   <form method="POST">
     <input name="subject" placeholder="Subject (e.g. DBMS)" required>
     <input name="title" placeholder="Note title" required>
@@ -14,27 +9,26 @@
     <button type="submit">Add note</button>
   </form>
 
-  <h2>Your notes</h2>
+  <h2>Notes</h2>
   <p>
     <a href="{{ url_for('home') }}">All</a>
-      {% for s in subjects %}
-    |    <a href="{{ url_for('home', subject=s) }}">{{ s }}</a>
-      {% endfor %}
- </p>
-{% if selected %}<p>Showing: <strong>{{ selected }}</strong></p>{% endif %}
-  {% for note in notes %}
-  <div>
-    <strong>{{ note.subject }}</strong> - {{ note.title }}
-    <p>{{ note.content }}</p>
-    <a href="{{ url_for('edit', note_id=note.id) }}">Edit</a>
-    <a href="{{ url_for('new_card', note_id=note.id) }}">Add flashcard</a>
-    <form method="POST" action="{{ url_for('delete', note_id=note.id) }}" style="display:inline">
-      <button type="submit">Delete</button>
-    </form>
-  </div>
-  {% else %}
-  <p>No notes yet.</p>
-{% endfor %}
+    {% for s in subjects %}
+      | <a href="{{ url_for('home', subject=s) }}">{{ s }}</a>
+    {% endfor %}
+  </p>
+  {% if selected %}<p>Showing: <strong>{{ selected }}</strong></p>{% endif %}
 
-</body>
-</html>
+  {% for note in notes %}
+    <div>
+      <strong>{{ note.subject }}</strong> - {{ note.title }}
+      <p>{{ note.content }}</p>
+      <a href="{{ url_for('new_card', note_id=note.id) }}">Add flashcard</a>
+      <a href="{{ url_for('edit', note_id=note.id) }}">Edit</a>
+      <form method="POST" action="{{ url_for('delete', note_id=note.id) }}" style="display:inline">
+        <button type="submit">Delete</button>
+      </form>
+    </div>
+  {% else %}
+    <p>No notes yet.</p>
+  {% endfor %}
+{% endblock %}
