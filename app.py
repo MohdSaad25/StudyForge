@@ -2,10 +2,15 @@ import sqlite3
 import random
 import os
 import pandas as pd
+from pypdf import PdfReader
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 from datetime import date, timedelta
 from flask import Flask, render_template, request, redirect, url_for,abort
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE_DIR, "studyforge.db")
 
@@ -264,8 +269,100 @@ def dashboard():
         week_labels=week_labels, week_counts=week_counts,
         total_reviews=len(rev), total_quiz=len(quiz),
     )
+@app.route("/note/<int:note_id>")
+def note_view(note_id):
+    with get_db() as conn:
+        note = conn.execute("SELECT * FROM notes WHERE id = ?", (note_id,)).fetchone()
+    if note is None:
+        abort(404)
+    return render_template("note.html", note=note)
 
+@app.route("/ask")
+def ask():
+    q = request.args.get("q", "").strip()
+    results = []
+    if q:
+        with get_db() as conn:
+            notes = conn.execute("SELECT * FROM notes").fetchall()
 
+        # har note ko chhote units mein todo, phir 3-3 units ke tukde banao
+        chunks = []
+        for n in notes:
+            parts = re.split(r"(?<=[.!?])\s+|\n\s*\n|•", n["content"])
+            units = [" ".join(p.split()) for p in parts]
+            units = [u for u in units if len(u) > 3]
+            for i in range(len(units)):
+                window = units[i:i + 3]
+                text = "\n".join(window)
+                if len(text) > 25:
+                    chunks.append({
+                        "text": text[:600],
+                        "title": n["title"],
+                        "subject": n["subject"],
+                        "note_id": n["id"],
+                        "start": i,
+                        "end": i + len(window),
+                    })
+
+        if chunks:
+            try:
+                vec = TfidfVectorizer(stop_words="english")
+                matrix = vec.fit_transform([c["text"] for c in chunks])
+                scores = cosine_similarity(vec.transform([q]), matrix).ravel()
+                for i in scores.argsort()[::-1]:
+                    if scores[i] <= 0 or len(results) == 3:
+                        break
+                    c = chunks[i]
+                    # pehle chune hue tukdon se overlap na ho
+                    overlap = any(
+                        r["note_id"] == c["note_id"]
+                        and c["start"] < r["end"] and r["start"] < c["end"]
+                        for r in results
+                    )
+                    if not overlap:
+                        results.append(dict(c, score=round(float(scores[i]) * 100)))
+            except ValueError:
+                results = []
+    return render_template("ask.html", q=q, results=results)
+
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+    error = None
+    if request.method == "POST":
+        f = request.files.get("file")
+        subject = request.form["subject"].strip()
+        title = request.form.get("title", "").strip()
+        if not f or not f.filename:
+            error = "Please choose a file."
+        else:
+            name = f.filename
+            ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+            text = None
+            try:
+                if ext == "txt":
+                    text = f.read().decode("utf-8", errors="ignore")
+                elif ext == "pdf":
+                    reader = PdfReader(f.stream)
+                    text = "\n".join((p.extract_text() or "") for p in reader.pages)
+                    # PDF ki line-wrap wali newlines hatao, paragraph breaks rakho
+                    text = re.sub(r"\n{3,}", "\n\n", text)
+                else:
+                    error = "Only .txt and .pdf files are supported."
+            except Exception:
+                error = "Could not read this file."
+
+            if text is not None:
+                text = text.strip()
+                if not text:
+                    error = "No text found. Scanned or handwritten files are not supported yet."
+                else:
+                    with get_db() as conn:
+                        conn.execute(
+                            "INSERT INTO notes (subject, title, content) VALUES (?, ?, ?)",
+                            (subject, title or name.rsplit(".", 1)[0], text),
+                        )
+                    return redirect(url_for("home"))
+    return render_template("upload.html", error=error)
 
 init_db()
 if __name__ == "__main__":

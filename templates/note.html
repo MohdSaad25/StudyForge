@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ note.title }}{% endblock %}
+{% block content %}
+  <h1>{{ note.title }}</h1>
+  <p><strong>{{ note.subject }}</strong></p>
+  <div class="note-content">{{ note.content }}</div>
+  <p>
+    <a href="{{ url_for('new_card', note_id=note.id) }}">Add flashcard</a> |
+    <a href="{{ url_for('edit', note_id=note.id) }}">Edit</a>
+  </p>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Upload notes{% endblock %}
+{% block content %}
+  <h1>Upload notes</h1>
+  <p>Supported: .txt and text-based .pdf (max 5 MB)</p>
+
+  {% if error %}<p><strong>{{ error }}</strong></p>{% endif %}
+
+  <form method="POST" enctype="multipart/form-data">
+    <input name="subject" placeholder="Subject (e.g. DBMS)" required>
+    <input name="title" placeholder="Title (optional, file name is used if empty)">
+    <input type="file" name="file" accept=".txt,.pdf" required>
+    <button type="submit">Upload</button>
+  </form>
+{% endblock %}

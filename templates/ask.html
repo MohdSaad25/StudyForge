@@ -10,11 +10,13 @@
   {% if q %}
     {% for r in results %}
       <div>
-        <p>{{ r.text }}</p>
-        <small>From: {{ r.subject }} - {{ r.title }} | Match: {{ r.score }}%</small>
+        <p class="note-content">{{ r.text }}</p>
+        <small>
+          From: {{ r.subject }} - {{ r.title }} | Match: {{ r.score }}% |
+          <a href="{{ url_for('note_view', note_id=r.note_id) }}">Open note</a>
+        </small>
       </div>
     {% else %}
-      <p>No matching notes found. Try different words.</p>
     {% endfor %}
   {% endif %}
 {% endblock %}
