@@ -20,6 +20,8 @@
   <canvas id="week" height="120"></canvas>
 
   <script>
+    Chart.defaults.color = getComputedStyle(document.body).color;
+    Chart.defaults.borderColor = getComputedStyle(document.body).getPropertyValue('--border').trim();
     new Chart(document.getElementById('acc'), {
       type: 'bar',
       data: {

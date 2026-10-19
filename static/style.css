@@ -1,1 +1,135 @@
 .note-content { white-space: pre-wrap; }
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1f2430;
+  --muted: #6b7280;
+  --border: #e3e6ec;
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --on-accent: #ffffff;
+  --danger: #dc2626;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #11131a;
+    --surface: #1a1d27;
+    --text: #e8eaf0;
+    --muted: #98a0b3;
+    --border: #2a2f3d;
+    --accent: #818cf8;
+    --accent-hover: #a5b4fc;
+    --on-accent: #0f1020;
+    --danger: #f87171;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+/* navbar */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+  padding: 14px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+nav a { color: var(--muted); text-decoration: none; font-weight: 500; }
+nav a:hover { color: var(--accent); }
+nav .brand { color: var(--text); font-size: 1.15rem; font-weight: 700; margin-right: 8px; }
+
+/* layout */
+main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+h1 { font-size: 1.7rem; margin: 0 0 16px; }
+h2 { font-size: 1.2rem; margin: 28px 0 12px; }
+a { color: var(--accent); }
+small { color: var(--muted); }
+.note-content { white-space: pre-wrap; }
+
+/* cards: notes, flashcards, quiz questions, results */
+main > div, form > div {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+main > div > a { margin-right: 14px; }
+
+/* forms */
+input, textarea, select {
+  width: 100%;
+  padding: 10px 12px;
+  margin: 0 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+textarea { min-height: 110px; resize: vertical; }
+input:focus, textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+input[type="radio"] { width: auto; margin: 0 8px 0 0; }
+label { display: inline-block; margin: 4px 0; cursor: pointer; }
+
+/* buttons */
+button {
+  font: inherit;
+  font-weight: 600;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+}
+button:hover { background: var(--accent-hover); }
+#ans button { margin-right: 8px; }
+
+/* delete button: chhota aur lal */
+form[action^="/delete"] button {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  padding: 3px 10px;
+}
+form[action^="/delete"] button:hover { background: var(--danger); color: var(--on-accent); }
+
+/* subject filter chips (home page) */
+.filters a {
+  display: inline-block;
+  padding: 4px 14px;
+  margin: 0 6px 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  text-decoration: none;
+}
+.filters a:hover { border-color: var(--accent); }
+
+/* dashboard charts */
+canvas {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+@media (max-width: 600px) {
+  nav { padding: 12px 16px; }
+  h1 { font-size: 1.4rem; }
+}

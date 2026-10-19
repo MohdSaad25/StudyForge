@@ -8,14 +8,14 @@
   {% block head %}{% endblock %}
 </head>
 <body>
-  <nav>
-    <a href="{{ url_for('home') }}"><strong>StudyForge</strong></a> |
-    <a href="{{ url_for('cards') }}">Flashcards</a> |
-    <a href="{{ url_for('review') }}">Review</a> |
-    <a href="{{ url_for('quiz') }}">Quiz</a> |
-    <a href="{{ url_for('dashboard') }}">Dashboard</a> |
-        <a href="{{ url_for('ask') }}">Ask</a> |
-    <a href="{{ url_for('upload') }}">Upload</a> |
+    <nav>
+    <a class="brand" href="{{ url_for('home') }}">StudyForge</a>
+    <a href="{{ url_for('cards') }}">Flashcards</a>
+    <a href="{{ url_for('review') }}">Review</a>
+    <a href="{{ url_for('quiz') }}">Quiz</a>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('ask') }}">Ask</a>
+    <a href="{{ url_for('upload') }}">Upload</a>
   </nav>
   <main>
     {% block content %}{% endblock %}
