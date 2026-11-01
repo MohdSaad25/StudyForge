@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
   <h1>Your notes</h1>
+  {% if due %}<p><strong>{{ due }}</strong> card(s) due today. <a href="{{ url_for('review') }}">Start review</a></p>{% endif %}
 
   <form method="POST">
     <input name="subject" placeholder="Subject (e.g. DBMS)" required>

@@ -7,6 +7,9 @@
       <strong>{{ c.subject }}</strong>: {{ c.question }}
       <p>{{ c.answer }}</p>
       <small>Next review: {{ c.next_review }} | Interval: {{ c.interval_days }} day(s) | Ease: {{ '%.2f'|format(c.ease) }}</small>
+      <form method="POST" action="{{ url_for('delete_card', card_id=c.id) }}" style="display:inline">
+      <button type="submit">Delete</button>
+     </form>
     </div>
   {% else %}
     <p>No flashcards yet. Add one from a note.</p>

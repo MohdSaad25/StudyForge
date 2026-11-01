@@ -7,37 +7,44 @@
   <h1>Progress</h1>
   <p>Cards reviewed: {{ total_reviews }} | Quiz answers: {{ total_quiz }}</p>
 
-  {% if weak %}
+  {% if weak and values[0] < 100 %}
     <p><strong>Weakest subject: {{ weak }}</strong> ({{ values[0] }}% accuracy). Revise it first.</p>
+  {% elif weak %}
+    <p><strong>Great going!</strong> All subjects are at 100% so far.</p>
   {% else %}
     <p>No data yet. Review some cards and take a quiz first.</p>
   {% endif %}
 
   <h2>Accuracy by subject</h2>
-  <canvas id="acc" height="120"></canvas>
+  <canvas id="acc" height="120"
+          data-labels='{{ labels|tojson }}' data-values='{{ values|tojson }}'></canvas>
 
   <h2>Cards reviewed (last 7 days)</h2>
-  <canvas id="week" height="120"></canvas>
+  <canvas id="week" height="120"
+          data-labels='{{ week_labels|tojson }}' data-values='{{ week_counts|tojson }}'></canvas>
 
   <script>
     Chart.defaults.color = getComputedStyle(document.body).color;
     Chart.defaults.borderColor = getComputedStyle(document.body).getPropertyValue('--border').trim();
-    new Chart(document.getElementById('acc'), {
-      type: 'bar',
-      data: {
-        labels: {{ labels|tojson }},
-        datasets: [{ label: 'Accuracy %', data: {{ values|tojson }} }]
-      },
-      options: { scales: { y: { min: 0, max: 100 } } }
-    });
+    const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim();
 
-    new Chart(document.getElementById('week'), {
-      type: 'bar',
-      data: {
-        labels: {{ week_labels|tojson }},
-        datasets: [{ label: 'Cards reviewed', data: {{ week_counts|tojson }} }]
-      },
-      options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-    });
+    function drawBar(id, label, options) {
+      const el = document.getElementById(id);
+      new Chart(el, {
+        type: 'bar',
+        data: {
+          labels: JSON.parse(el.dataset.labels),
+          datasets: [{
+            label: label,
+            data: JSON.parse(el.dataset.values),
+            backgroundColor: accent,
+            borderRadius: 6
+          }]
+        },
+        options: options
+      });
+    }
+    drawBar('acc', 'Accuracy %', { scales: { y: { min: 0, max: 100 } } });
+    drawBar('week', 'Cards reviewed', { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } });
   </script>
 {% endblock %}

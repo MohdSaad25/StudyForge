@@ -101,13 +101,13 @@ button:hover { background: var(--accent-hover); }
 #ans button { margin-right: 8px; }
 
 /* delete button: chhota aur lal */
-form[action^="/delete"] button {
+form[action*="delete"] button {
   background: transparent;
   color: var(--danger);
   border: 1px solid var(--danger);
   padding: 3px 10px;
 }
-form[action^="/delete"] button:hover { background: var(--danger); color: var(--on-accent); }
+form[action*="delete"] button:hover { background: var(--danger); color: var(--on-accent); }
 
 /* subject filter chips (home page) */
 .filters a {

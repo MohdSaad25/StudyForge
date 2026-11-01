@@ -1,4 +1,9 @@
 import sqlite3
+import sqlite3
+
+c = sqlite3.connect("studyforge.db")
+print(c.execute("SELECT subject, datetime(reviewed_at, 'localtime') FROM review_log").fetchall())
+
 import random
 import os
 import pandas as pd
@@ -59,6 +64,8 @@ def init_db():
                 reviewed_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
+
+
         conn.execute("""
             CREATE TABLE IF NOT EXISTS quiz_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,6 +75,8 @@ def init_db():
                 taken_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        conn.execute("DELETE FROM review_log WHERE card_id NOT IN (SELECT id FROM flashcards)")
+        conn.execute("DELETE FROM quiz_log WHERE card_id NOT IN (SELECT id FROM flashcards)")
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -94,10 +103,18 @@ def home():
             ).fetchall()
         else:
             notes = conn.execute("SELECT * FROM notes ORDER BY created_at DESC").fetchall()
-    return render_template("index.html", notes=notes, subjects=subjects, selected=selected)
+
+        due = conn.execute(
+        "SELECT COUNT(*) FROM flashcards WHERE next_review <= ?",
+            (date.today().isoformat(),),
+        ).fetchone()[0]
+                    
+    return render_template("index.html", notes=notes, subjects=subjects, selected=selected , due=due)
 @app.route("/delete/<int:note_id>", methods=["POST"])
 def delete(note_id):
     with get_db() as conn:
+        conn.execute("DELETE FROM review_log WHERE card_id IN (SELECT id FROM flashcards WHERE note_id = ?)", (note_id,))
+        conn.execute("DELETE FROM quiz_log WHERE card_id IN (SELECT id FROM flashcards WHERE note_id = ?)", (note_id,))
         conn.execute("DELETE FROM flashcards WHERE note_id = ?", (note_id,))
         conn.execute("DELETE FROM notes WHERE id = ?", (note_id,))
     return redirect(url_for("home"))
@@ -363,6 +380,15 @@ def upload():
                         )
                     return redirect(url_for("home"))
     return render_template("upload.html", error=error)
+    
+@app.route("/cards/delete/<int:card_id>", methods=["POST"])
+def delete_card(card_id):
+    with get_db() as conn:
+        conn.execute("DELETE FROM review_log WHERE card_id = ?", (card_id,))
+        conn.execute("DELETE FROM quiz_log WHERE card_id = ?", (card_id,))
+        conn.execute("DELETE FROM flashcards WHERE id = ?", (card_id,))
+    return redirect(url_for("cards"))
+
 
 init_db()
 if __name__ == "__main__":
