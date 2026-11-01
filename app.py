@@ -1,9 +1,5 @@
 import sqlite3
 import sqlite3
-
-c = sqlite3.connect("studyforge.db")
-print(c.execute("SELECT subject, datetime(reviewed_at, 'localtime') FROM review_log").fetchall())
-
 import random
 import os
 import pandas as pd
@@ -108,7 +104,7 @@ def home():
         "SELECT COUNT(*) FROM flashcards WHERE next_review <= ?",
             (date.today().isoformat(),),
         ).fetchone()[0]
-                    
+
     return render_template("index.html", notes=notes, subjects=subjects, selected=selected , due=due)
 @app.route("/delete/<int:note_id>", methods=["POST"])
 def delete(note_id):
