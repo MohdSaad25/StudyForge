@@ -39,6 +39,15 @@ def sm2(ease, interval, reps, quality):
 def init_db():
     with get_db() as conn:
         conn.execute("""
+            CREATE TABLE IF NOT EXISTS notes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                subject TEXT NOT NULL,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS flashcards (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 note_id INTEGER NOT NULL,
@@ -60,8 +69,6 @@ def init_db():
                 reviewed_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
-
-
         conn.execute("""
             CREATE TABLE IF NOT EXISTS quiz_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
